@@ -3,13 +3,18 @@
 /*
 Plugin Name: Проверка IP комментариев
 Description:
-Version: 0.1
+Version: 0.1.1
 Author: Войцеховский Вячеслав
 Author URI: https://vyacheslav-v.ru
 */
 
-$pluginDIR = plugins_url() . '/check-comments-ip';
-wp_enqueue_script( 'google-map', "{$pluginDIR}/script.js", false, false, true );
+
+add_action( 'wp_enqueue_scripts', 'addJsToTheme' );
+function addJsToTheme()
+{
+  $pluginDirUrl = plugin_dir_url(__FILE__);
+  wp_enqueue_script( 'google-map', "{$pluginDirUrl}/script.js", false, false, true );
+}
 
 add_filter('comment_form_defaults', 'addIpFieldToComent');
 function addIpFieldToComent(array $defaults): array
