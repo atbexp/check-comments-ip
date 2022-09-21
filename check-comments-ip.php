@@ -3,7 +3,7 @@
 /*
 Plugin Name: Проверка IP комментариев
 Description:
-Version: 0.2
+Version: 0.2.1
 Author: Войцеховский Вячеслав
 Author URI: https://vyacheslav-v.ru
 */
@@ -26,17 +26,22 @@ function addIpFieldToComent(array $defaults): array
 add_filter('pre_comment_approved', 'checkCommentIp');
 function checkCommentIp($approved)
 {
-    if (!isset($_POST['client-ip'])) {
+    $frontClientIp =  $_POST['client-ip'] ?? null;
+
+    if (!$frontClientIp) {
         return new WP_Error('comment_closed', __('Sorry, we can not detected client-ip field.'), 403);
     }
-    $clientIp = getIPAddress();
-    if ($clientIp !== $_POST['client-ip']) {
+    if (!filter_var($frontClientIp, FILTER_VALIDATE_IP)) {
+        return new WP_Error('comment_closed', __('Sorry, the form sended not valid ip address.'), 403);
+    }
+    $backClientIp = getUserIPAddress();
+    if ($backClientIp !== $frontClientIp) {
         return new WP_Error('comment_closed', __('Sorry, comments are closed for this item.'), 403);
     }
     return $approved;
 }
 
-function getIPAddress()
+function getUserIPAddress()
 {
     if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
         $ip = $_SERVER['HTTP_CLIENT_IP'];
